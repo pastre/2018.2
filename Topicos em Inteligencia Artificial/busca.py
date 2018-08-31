@@ -2,7 +2,7 @@ from PIL import Image
 
 import heapq
 
-im = Image.open('C:\\Temp\\a.png', 'r')
+im = Image.open('C:\\Temp\\b.png', 'r')
 wdt, hgt = im.size
 
 pxl = im.load()
@@ -48,28 +48,14 @@ class GridWithWeights(SquareGrid):
         self.weights = {}
     
     def cost(self, from_node, to_node):
-        return self.weights.get(to_node, 1)
+        return self.weights.get(to_node, 1) 
 
-
-a = GridWithWeights(wdt, hgt)
-
-for x in range(0, wdt):
-    for y in range(0, hgt):
-        if not pxl[x, y] ==  (0, 0, 0, 255):
-            a.walls.append((x, y, ))
-        
-print('Walls: ', a.walls)
-
-#print(pixels)
-f = []
-for y in range(0, wdt):
-    if pxl[y, 0] ==  (0, 0, 0, 255):
-        f.append('branco')
-print(len(f))
 def heuristic(a, b):
     (x1, y1) = a
     (x2, y2) = b
     return abs(x1 - x2) + abs(y1 - y2)
+
+visited = {}
 
 def search (graph, start, goal, algorithm):
     frontier = PriorityQueue()
@@ -83,7 +69,7 @@ def search (graph, start, goal, algorithm):
         current = frontier.get()
         
         if current == goal:
-            break
+            return frontier.elements
         
         for next in graph.neighbors(current):
             new_cost = cost_so_far[current] + graph.cost(current, next)
@@ -97,3 +83,55 @@ def search (graph, start, goal, algorithm):
                     priority = heuristic(goal, next)
                 frontier.put(next, priority)
                 came_from[next] = current
+                if not current in visited.keys(): visited[current] = 0
+                visited[current] += 1
+                x, y = current
+                pxl[x, y] = (255, 50, 50, int(visited[current]/1000/(sum([i for i in visited.values()]))))
+
+a = GridWithWeights(wdt, hgt)
+
+for x in range(0, wdt):
+    for y in range(0, hgt):
+        if pxl[x, y] ==  (0, 0, 0, 255):
+            a.walls.append((x, y, ))
+start, end = (), ()
+
+for x in range(0, wdt):
+    if pxl[x, 0] == (255, 255, 255, 255):
+        start = (x, 0)
+        break
+
+for x in range(0, wdt):
+    if pxl[x, wdt - 1] == (255, 255, 255, 255):
+        end = (x, wdt - 1)
+        break
+if end == ():
+    for x in range(0, wdt):
+        if pxl[wdt - 1, x] == (255, 255, 255, 255):
+            print('Found end')
+            end = (wdt - 1, x)
+            break
+
+if end == ():
+    for x in range(0, wdt):
+        if pxl[0, x] == (255, 255, 255, 255):
+            print('Found end')
+            end = (wdt - 1, 0)
+            break
+if end == ():
+    for x in range(wdt, 0, -1):
+         if pxl[x - 1, 0] == (255, 255, 255, 255):
+            print('Found end')
+            end = (0, x)
+            break
+print(f'Start is {start} end is {end}')
+r = search(a, start, end, 'glutty')
+
+
+for element in r:
+    _, tmp= element
+    x, y  = tmp
+    pxl[x, y] = (0, 255, 0, 100)
+print(r)
+
+im.show()
