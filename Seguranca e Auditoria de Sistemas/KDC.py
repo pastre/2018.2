@@ -1,6 +1,4 @@
 #https://userpages.umbc.edu/~dgorin1/451/security/dcomm/keydist.htm
-
-
 import random
 def encrypt(key):
     return key*2
@@ -10,12 +8,12 @@ def decrypt(key):
 
 class KDC:
     def __init__(self):
-        self.keys = {'alice': 123, 'bob' = 456}
+        self.keys = {'alice': 123, 'bob' : 456}
     
 class KDCUser:
     def __init__(self, name):
         self.kdc = KDC()
-        self.key = self.kdc.keys[]
+        self.key = self.kdc.keys[name]
   
 class Alice(KDCUser):
     def __init__(self):
