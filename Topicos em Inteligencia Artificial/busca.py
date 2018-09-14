@@ -1,6 +1,8 @@
 from PIL import Image
-
+from time import sleep
 import heapq
+import cv2
+import numpy
 
 im = Image.open('C:\\Temp\\b.png', 'r')
 wdt, hgt = im.size
@@ -87,7 +89,11 @@ def search (graph, start, goal, algorithm):
                 visited[current] += 1
                 x, y = current
                 pxl[x, y] = (255, 50, 50, int(visited[current]/1000/(sum([i for i in visited.values()]))))
-
+                cv2_img = numpy.array(im)
+                frame =  cv2_img[:, :, ::-1].copy() 
+                resize = cv2.resize(frame, (640, 480)) 
+                cv2.imshow('asd', resize)
+                cv2.waitKey(1)
 a = GridWithWeights(wdt, hgt)
 
 for x in range(0, wdt):
@@ -125,13 +131,10 @@ if end == ():
             end = (0, x)
             break
 print(f'Start is {start} end is {end}')
-r = search(a, start, end, 'glutty')
+r = search(a, start, end, 'a*')
 
 
 for element in r:
     _, tmp= element
     x, y  = tmp
     pxl[x, y] = (0, 255, 0, 100)
-print(r)
-
-im.show()
