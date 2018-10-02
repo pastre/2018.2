@@ -1,56 +1,73 @@
 import hashlib
 import json
 import itertools
-
+import time
 
 FILE_PATH = 'users.json'
 ALFABETO ='abcdefghijklmnopqrstuvwxyz' #ABCDEFGHIJKLMNOPQRSTUVWXYX0123456789'
 
 def hash(string):
-	 return hashlib.md5(string.encode('utf-8')).hexdigest()
+     return hashlib.md5(string.encode('utf-8')).hexdigest()
 
 def persist_data(data):
-	open(FILE_PATH, 'w').write(json.dumps(data, indent = 4))
+    open(FILE_PATH, 'w').write(json.dumps(data, indent = 4))
 
 def load_data():
-	try:
-		return json.loads(open(FILE_PATH, 'r').read())
-	except FileNotFoundError:
-		return {}
+    try:
+        return json.loads(open(FILE_PATH, 'r').read())
+    except FileNotFoundError:
+        return {}
 
 def cadastra_usuario(usuario, senha):
-	data = load_data()
-	if usuario in data.keys():
-		print('Usuario ja cadastrado')
-		return
-	data[usuario] = hash(senha)
-	persist_data(data)
-	print('Usuario cadastrado com sucesso')
+    data = load_data()
+    if usuario in data.keys():
+        print('Usuario ja cadastrado')
+        return
+    data[usuario] = hash(senha)
+    persist_data(data)
+    print('Usuario cadastrado com sucesso')
 
 def autentica_usuario(usuario, senha):
-	h = hash(senha)
-	data = load_data()
-	if data[usuario] == h: print(f'Bem vindo, {usuario}')
-	else: print('Ops! Senha errada!')
+    h = hash(senha)
+    data = load_data()
+    if data[usuario] == h:
+        print(f'Bem vindo, {usuario}')
+        return True
+    else:
+        print('Ops! Senha errada!')
+        return False
+
+latest_users = []
+def autentica_seguro(usuario, senha):
+    num_tries =  latest_users.count(usuario)
+    if num_tries > 3:
+        print('Ops! Parece que vc nao tem mais tentavidas... Contate o administrdor do sistema')
+        time.sleep(1)
+        return False
+    if not autentica_usuario(usuario, senha):
+        print(f'Cuidado, vc tem {3 - num_tries} chances')
+        latest_users.append(usuario)
+        return False
+    else: return True
 
 def bruteforce_usuario(usuario):
-	data = load_data()
-	if not usuario in data.keys():
-		print('Usuario nao encontrado')
-		return
-	possibilities =list(itertools.product('abcdefghijklmnopqrstuvwxyz', repeat=4)) # 3 is the length of your result.
-	for p in possibilities:
-		s = ''.join(p)
-		if data[usuario] == hash(s):
-			print(f'A senha para {usuario} é {s}')
-			return
-	print('Nao encontrei a senha!')
+    data = load_data()
+    if not usuario in data.keys():
+        print('Usuario nao encontrado')
+        return
+    possibilities =list(itertools.product('abcdefghijklmnopqrstuvwxyz', repeat=4)) # 3 is the length of your result.
+    for p in possibilities:
+        s = ''.join(p)
+        if autentica_seguro(usuario, s):
+            print(f'A senha para {usuario} é {s}')
+            return
+    print('Nao encontrei a senha!')
 
 
 def popula_base():
-	cadastra_usuario('aaaa', 'aaaa')
-	cadastra_usuario('aaab', 'aaab')
-	cadastra_usuario('aaac', 'aaac')
+    cadastra_usuario('aaaa', 'aaaa')
+    cadastra_usuario('aaab', 'aaab')
+    cadastra_usuario('aaac', 'aaac')
 # bruteforce_usuario('aaab')
 
 def main():
