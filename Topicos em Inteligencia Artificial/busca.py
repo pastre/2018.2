@@ -4,7 +4,7 @@ import heapq
 import cv2
 import numpy
 
-im = Image.open('C:\\Temp\\b.png', 'r')
+im = Image.open('maze.png', 'r')
 wdt, hgt = im.size
 
 pxl = im.load()
@@ -83,6 +83,9 @@ def search (graph, start, goal, algorithm):
                     priority = new_cost
                 elif algorithm == 'glutty':    
                     priority = heuristic(goal, next)
+                    					
+                else:
+                    priority = 1
                 frontier.put(next, priority)
                 came_from[next] = current
                 if not current in visited.keys(): visited[current] = 0
@@ -92,8 +95,10 @@ def search (graph, start, goal, algorithm):
                 cv2_img = numpy.array(im)
                 frame =  cv2_img[:, :, ::-1].copy() 
                 resize = cv2.resize(frame, (640, 480)) 
-                cv2.imshow('asd', resize)
+                cv2.imshow(algorithm, resize)
                 cv2.waitKey(1)
+
+
 a = GridWithWeights(wdt, hgt)
 
 for x in range(0, wdt):
@@ -130,11 +135,13 @@ if end == ():
             print('Found end')
             end = (0, x)
             break
-print(f'Start is {start} end is {end}')
-r = search(a, start, end, 'a*')
+
+import time
 
 
-for element in r:
-    _, tmp= element
-    x, y  = tmp
-    pxl[x, y] = (0, 255, 0, 100)
+tmp = ['expanded, ''a*', 'glutty', 'dij']
+for algo in tmp:
+    t1 = time.time()
+    search(a, start, end, algo)
+    print(f'{algo}: {time.time() - t1}')
+
